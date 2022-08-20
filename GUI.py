@@ -30,7 +30,7 @@ class Application(ttk.Frame):
         self.entryPort.pack()
 
         # 隧道名称
-        self.labelName = ttk.LabelFrame(self, text="隧道名称")
+        self.labelName = ttk.LabelFrame(self, text="隧道名称（只能为字母、数字和下划线）")
         self.labelName.grid(row=1, column=0, sticky=E)
         self.name = ttk.StringVar()
         self.entryName = ttk.Entry(self.labelName, textvariable=self.name, width=25, font=("黑体", 20), bootstyle="light")
@@ -54,12 +54,11 @@ class Application(ttk.Frame):
 
         s = ttk.Style()
         s.configure('my.TButton', font=("黑体", 15))
-        self.btn01 = ttk.Button(self, text="创建", style='my.TButton', command=self.establish)
-        self.btn01.grid(row=3, column=0, sticky=NSEW, pady=20)
-        self.btn02 = ttk.Button(self, width=10, text="启动", style='my.TButton', command=self.run)
-        self.btn02.grid(row=4, column=0, sticky=W, padx=50, pady=20)
-        self.btn03 = ttk.Button(self, width=10, text="停止", style='my.TButton', command=self.end)
-        self.btn03.grid(row=4, column=0, sticky=E, padx=50, pady=20)
+        self.btn01 = ttk.Button(self, width=14, text="创建", style='my.TButton', command=self.establish)
+        self.btn01.grid(row=3, column=0, sticky=W, pady=20)
+        self.btn02 = ttk.Button(self, width=14, text="启动", style='my.TButton', command=self.run)
+        self.btn02.grid(row=3, column=0, sticky=E, pady=20)
+
 
     def establish(self):
         if self.typ.get() == "TCP":
@@ -88,7 +87,7 @@ class Application(ttk.Frame):
         with open("frpc.log", "r") as f:
             self.log = str(f.readlines()[-3:])
             if "[W]" in self.log:
-                os.system('taskkill /F /IM frpc.exe')
+                os.popen('taskkill /F /IM frpc.exe')
                 if "port already" in self.log:
                     messagebox.showerror("启动失败", "远程端口已被使用，请改用其他端口")
                 elif "proxy name" in self.log:
@@ -98,15 +97,18 @@ class Application(ttk.Frame):
             else:
                 messagebox.showinfo("启动成功", "您的本地地址：" + self.ip.get() + ":" + self.port.get() +
                                     "已映射到服务器地址：【这里填服务器IP】:" + self.remote.get())
+        self.btn02 = ttk.Button(self, width=14, text="停止", style='my.TButton', command=self.end)
+        self.btn02.grid(row=3, column=0, sticky=E, pady=20)
 
     def end(self):
         os.popen('taskkill /F /IM frpc.exe')
-        messagebox.showerror("停止", "已结束frpc.exe进程")
+        self.btn02 = ttk.Button(self, width=14, text="启动", style='my.TButton', command=self.run)
+        self.btn02.grid(row=3, column=0, sticky=E, pady=20)
 
 
 if __name__ == '__main__':
     root = ttk.Window(themename="minty")
-    root.geometry("600x500+600+250")
+    root.geometry("600x430+600+250")
     root.title("FRPGUI")
     app = Application(master=root)
 
