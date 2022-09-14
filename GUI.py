@@ -59,23 +59,26 @@ class Application(ttk.Frame):
         self.btn02 = ttk.Button(self, width=14, text="启动", style='my.TButton', command=self.run)
         self.btn02.grid(row=3, column=0, sticky=E, pady=20)
 
+        if os.path.exists("frpc.ini"):
+            with open("frpc.ini", "r") as f:
+                self.cache = (f.readlines())
+            self.port.set(self.cache[9][13:].strip())
+            self.name.set(self.cache[6].strip('[]\n'))
+            self.typ.set(self.cache[7][7:].swapcase().strip())
+            self.remote.set(self.cache[10][14:].strip())
 
     def establish(self):
-        if self.typ.get() == "TCP":
-            typ = "tcp"
-        if self.typ.get() == "UDP":
-            typ = "udp"
         if self.remote.get() == "":
             self.remote.set(random.randint(6000, 6999))  # 随机数生成，服务器的端口我只开放了这个范围，应该够了
         with open("frpc.ini", "w") as f:
             list = ['[common]\n',
-                    'server_addr = 【这里填服务器IP】\n',
+                    'server_addr = 124.222.167.20\n',
                     'server_port = 7000\n',
                     'log_file = ./frpc.log\n',
-                    'token = 【这里填密钥，如果没有将这行删除】\n'
+                    'token = FrpJtks51zjscs\n'
                     '\n',
                     '[' + self.name.get() + ']\n',
-                    'type = ' + typ + '\n',
+                    'type = ' + self.typ.get().swapcase() + '\n',  # swapcase()是大小写转换
                     'local_ip = ' + self.ip.get() + '\n',
                     'local_port = ' + self.port.get() + '\n',
                     'remote_port = ' + self.remote.get()]
@@ -95,8 +98,10 @@ class Application(ttk.Frame):
                 else:
                     messagebox.showerror("启动失败", "出现了没有预料的错误，请检查日志文件frpc.log，联系小叶子")
             else:
+                self.clipboard_clear()
+                self.clipboard_append("124.222.167.20:" + self.remote.get())
                 messagebox.showinfo("启动成功", "您的本地地址：" + self.ip.get() + ":" + self.port.get() +
-                                    "已映射到服务器地址：【这里填服务器IP】:" + self.remote.get())
+                                    "已映射到服务器地址：124.222.167.20:" + self.remote.get() + "\n\n地址已自动复制到剪切板，使用时请勿关闭此程序")
         self.btn02 = ttk.Button(self, width=14, text="停止", style='my.TButton', command=self.end)
         self.btn02.grid(row=3, column=0, sticky=E, pady=20)
 
@@ -109,7 +114,7 @@ class Application(ttk.Frame):
 if __name__ == '__main__':
     root = ttk.Window(themename="minty")
     root.geometry("600x430+600+250")
-    root.title("FRPGUI")
+    root.title("FRP内网穿透 By:小叶子Small_leaf")
     app = Application(master=root)
 
 
